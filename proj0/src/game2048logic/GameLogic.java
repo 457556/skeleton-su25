@@ -20,7 +20,35 @@ public class GameLogic {
      */
     public static int moveTileUpAsFarAsPossible(int[][] board, int r, int c, int minR) {
         // TODO: Fill this in in tasks 2, 3, 4
-        return 0;
+        if (r <= minR) {
+            return minR;
+        } else if (board[r][c] == 0) {
+            return minR;
+        }
+
+        int row = minR;
+        boolean foundObstacle = false;
+
+        for (int y = r - 1; y >= minR; y -= 1) {
+            if (board[y][c] != 0) {
+                row = y;
+                foundObstacle = true;
+                break;
+            }
+        }
+        int oldValue = board[r][c];
+        board[r][c] = 0;
+        if (foundObstacle) {
+            if (board[row][c] == oldValue) {
+                board[row][c] = oldValue * 2;
+                return 1 + row;
+            } else {
+                board[row + 1][c] = oldValue;
+            }
+        } else {
+            board[minR][c] = oldValue;
+        }
+        return minR;
     }
 
     /**
@@ -32,6 +60,14 @@ public class GameLogic {
      */
     public static void tiltColumn(int[][] board, int c) {
         // TODO: fill this in in task 5
+        int newMinR = 0;
+        for (int r =  0; r < board.length; r += 1) {
+            if (board[r][c] == 0) {
+                continue;
+            }
+            int result = moveTileUpAsFarAsPossible(board, r, c, newMinR);
+            newMinR = result;
+        }
         return;
     }
 
@@ -42,6 +78,9 @@ public class GameLogic {
      */
     public static void tiltUp(int[][] board) {
         // TODO: fill this in in task 6
+        for (int l = 0; l < board[0].length; l += 1) {
+            tiltColumn(board, l);
+        }
         return;
     }
 
@@ -55,12 +94,24 @@ public class GameLogic {
     public static void tilt(int[][] board, Side side) {
         // TODO: fill this in in task 7
         if (side == Side.NORTH) {
+            tiltUp(board);
             return;
         } else if (side == Side.EAST) {
+            rotateLeft(board);
+            tiltUp(board);
+            rotateRight(board);
             return;
         } else if (side == Side.SOUTH) {
+            rotateRight(board);
+            rotateRight(board);
+            tiltUp(board);
+            rotateLeft(board);
+            rotateLeft(board);
             return;
         } else if (side == Side.WEST) {
+            rotateRight(board);
+            tiltUp(board);
+            rotateLeft(board);
             return;
         } else {
             System.out.println("Invalid side specified");
